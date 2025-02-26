@@ -43,7 +43,7 @@ total_label.place(x=1000, y=600)
 
 # Creating buttons
 next_button = Button(root3,
-                     text='Receive',
+                     text='Back',
                      font=('Arial', 26, 'bold'),
                      bg='#d40707',
                      fg='black',
@@ -64,17 +64,6 @@ def next_on_leave(e):
 
 next_button.bind('<Leave>', next_on_leave)
 
-# Adding a new button on the left side at the bottom
-left_button = Button(root3,
-                     text='Back',
-                     font=('Arial', 26, 'bold'),
-                     bg='#d40707',
-                     fg='black',
-                     activeforeground='black',
-                     activebackground='#fc0303',
-                     padx=10,
-                     pady=4)
-left_button.place(x=50, y=790)
 
 # Running the main loop
 root3.mainloop()

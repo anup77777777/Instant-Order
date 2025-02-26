@@ -3,7 +3,11 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 import subprocess
 
+# Global variable to store table number
+table_number = ""
+
 def placeorder_click():
+    global table_number
     milk_tea_count= int(milk_tea_sb.get())
     black_tea_count= int(black_tea_sb.get())
     hot_lemon_count= int(hot_lemon_sb.get())
@@ -92,6 +96,8 @@ def placeorder_click():
         table_number_entry.place(x=470, y=330)
 
         def next_click():
+            global table_number
+            table_number = table_number_entry.get()
             root1.destroy()
 
             def confirm_on_enter(e):
@@ -110,6 +116,32 @@ def placeorder_click():
                 back_button.config(fg='black',
                                            bg='#d40707')
             
+            # Calculate total prices
+            items = [
+                ("Milk Tea", milk_tea_count, 25),
+                ("Black Tea", black_tea_count, 20),
+                ("Hot Lemon", hot_lemon_count, 30),
+                ("Black Coffee", black_coffee_count, 40),
+                ("Milk Coffee", milk_coffee_count, 50),
+                ("Hot Chocolate", hot_chocolate_count, 90),
+                ("Coke", coke_count, 60),
+                ("Sprite", sprite_count, 60),
+                ("Fanta", fanta_count, 60),
+                ("Lassi", lassi_count, 60),
+                ("Veg MoMo", veg_momo_count, 100),
+                ("Buff MoMo", buff_momo_count, 130),
+                ("Chicken MoMo", chicken_momo_count, 150),
+                ("Chicken Burger", chicken_burger_count, 310),
+                ("Ham Burger", ham_burger_count, 280),
+                ("Veg Burger", veg_burger_count, 230),
+                ("Chicken Pizza", chicken_pizza_count, 550),
+                ("Mushroom Pizza", mushroom_pizza_count, 450),
+                ("Cheese Pizza", cheese_pizza_count, 500)
+            ]
+
+            total_price = 0 #total price of all items
+            y_position = 230 #position of the first item
+
             #window
             root2= Toplevel()
             root2.geometry('1920x1080')
@@ -130,6 +162,33 @@ def placeorder_click():
                               bg='#d40707',
                               padx=300)
             your_order.place(x=320, y=100)
+
+            # Display table number
+            table_number_label = Label(root2, text=f"Table Number : {table_number}",
+                                       font=('Arial', 18, ), 
+                                       fg='black', 
+                                       bg='white')
+            table_number_label.place(x=250, y=200)
+
+            # Display items and their total prices
+            for item_name, item_count, item_price in items:
+                if item_count > 0:
+                    item_total_price = item_count * item_price
+                    total_price += item_total_price
+                    item_label = Label(root2,
+                                       text=f"{item_name} : {item_count} x Rs. {item_price}",
+                                       font=('Arial', 18), 
+                                       fg='black', 
+                                       bg='white')
+                    item_label.place(x=250, y=y_position)
+                    y_position += 40
+
+            # Overall total price
+            total_price_label = Label(root2, text=f"Total : Rs. {total_price}", 
+                                      font=('Arial', 25, 'bold')
+                                      , fg='#d40707', 
+                                      bg='white')
+            total_price_label.place(x=660, y=620)
 
             #Confirm
             confirm_button=Button(root2,
