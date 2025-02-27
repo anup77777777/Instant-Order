@@ -1,5 +1,7 @@
 from tkinter import *
 from PIL import ImageTk, Image
+import subprocess
+import sqlite3
 
 # Creating the main window
 root3 = Tk()
@@ -26,41 +28,50 @@ logo_mark_label.place(x=0, y=-25)
 
 # Creating labels
 order_details = Label(root3, 
-                  text='Order', 
+                  text='Orders', 
                      font=('Goudy Old Style', 40, 'bold'),
                      bg='#d40707',
                      fg='white',
-                     padx=484)
+                     padx=463)
 order_details.place(x=200, y=100)
 
 # Order list frame inside the red rectangle
 list_frame = Frame(root3, bg='white')
 list_frame.place(x=210, y=190, width=1080, height=480)
 
-# Sample orders data
-orders = [
-    {"id": 1, "details": "Username  1 - Table no.1 "},
-    {"id": 2, "details": "Username  2 - Table no.1 "},
-    {"id": 3, "details": "Username  3 - Table no.1 "},
-    {"id": 4, "details": "Username  4 - Table no.1 "},
-    {"id": 5, "details": "Username  5 - Table no.1 "},
-    {"id": 6, "details": "Username  6 - Table no.1 "},
-]
+# Fetch orders data from the database
+conn = sqlite3.connect('orders.db')
+c = conn.cursor()
+c.execute("SELECT DISTINCT table_number FROM orders")
+orders = c.fetchall()
+conn.close()
 
 # Create rows for each order
 for order in orders:
+    table_number = order[0]
     row_frame = Frame(list_frame, bg='white')
     row_frame.pack(fill='x', pady=4)  # Fill horizontal space
     
     # Order information label (left-aligned)
     info_label = Label(row_frame, 
-                       text=order['details'], 
+                       text=f"Table Number: {table_number}", 
                        font=('Arial', 18), 
                        bg='white',
                        anchor='w')
     info_label.pack(side='left', anchor='w')  # Pack to the left
     
     # Open button (right-aligned)
+    def open_click(table_number=table_number):
+        subprocess.run(['python', 'Order.py', table_number])
+    
+    def delete_click(table_number=table_number):
+        conn = sqlite3.connect('orders.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM orders WHERE table_number=?", (table_number,))
+        conn.commit()
+        conn.close()
+        row_frame.destroy()  # Remove the row from the UI
+
     open_btn = Button(row_frame,
                       text="Open",
                       font=('Arial', 16),
@@ -68,45 +79,23 @@ for order in orders:
                       fg='black',
                       activebackground='#fc0303',
                       activeforeground='black',
-                      padx=20)
+                      padx=20,
+                      command=open_click)
     open_btn.pack(side='right')  # Pack to the right
+
+    delete_btn = Button(row_frame,
+                        text="Delete",
+                        font=('Arial', 16),
+                        bg='#d40707',
+                        fg='black',
+                        activebackground='#fc0303',
+                        activeforeground='black',
+                        padx=20,
+                        command=delete_click)
+    delete_btn.pack(side='right', padx=10)  # Pack to the right with padding
     
     # Hover effects
     open_btn.bind('<Enter>', lambda e, btn=open_btn: btn.config(bg='#fc0303'))
     open_btn.bind('<Leave>', lambda e, btn=open_btn: btn.config(bg='#d40707'))
-
-
-# Buttons
-next_button = Button(root3,
-                     text='Receive',
-                     font=('Arial', 26, 'bold'),
-                     bg='#d40707',
-                     fg='black',
-                     activeforeground='black',
-                     activebackground='#fc0303',
-                     padx=30,
-                     pady=4)
-next_button.place(x=600, y=790)
-
-# Event bindings for Receive button
-def next_on_enter(e):
-    next_button.config(fg='black', bg='#fc0303')
-next_button.bind('<Enter>', next_on_enter)
-
-def next_on_leave(e):
-    next_button.config(fg='black', bg='#d40707')
-next_button.bind('<Leave>', next_on_leave)
-
-# Back button
-left_button = Button(root3,
-                     text='Back',
-                     font=('Arial', 26, 'bold'),
-                     bg='#d40707',
-                     fg='black',
-                     activeforeground='black',
-                     activebackground='#fc0303',
-                     padx=10,
-                     pady=4)
-left_button.place(x=50, y=790)
 
 root3.mainloop()

@@ -211,7 +211,7 @@ def placeorder_click():
                 
                     conn.commit()
                     conn.close()
-                    root.destroy()
+                    confirm_button.configure(state="disabled")
                     subprocess.run(['python', 'confirnorder.py'])
                     
             else:
@@ -706,7 +706,7 @@ place_order.bind('<Enter>', placeorder_on_enter)
 place_order.bind('<Leave>', placeorder_on_leave)
 
 
-#Adding Profile Buttom abd bill button
+#Profile Buttom
 def profile_click():
     root10 = Toplevel()
     root10.title('Order Details')
@@ -715,18 +715,145 @@ def profile_click():
     logo = PhotoImage(file='instantorder_logowithoutbg.png')
     root10.iconphoto(True, logo)
 
+    #Logout BUttom
+    def logout_click():
+        root.destroy()
+        subprocess.run(['python','login.py'])
     
+    def logout_on_enter(e):
+        logout_buttom.config(bg='#fc0303',
+                  fg='black')
+    
+    def logout_on_leave(e):
+        logout_buttom.config(bg='#d40707',
+                  fg='black')
+    logout_buttom = Button(root10,
+                     text='LogOut',
+                     font=('Arial', 20, 'bold'),
+                     fg='black',
+                     bg='#d40707',
+                     activeforeground='black',
+                     activebackground='#fc0303',
+                     padx=30,
+                     pady=0,
+                     command=logout_click)
+    logout_buttom.place(x=200, y=50)
+
+    logout_buttom.bind('<Enter>', logout_on_enter)
+    logout_buttom.bind('<Leave>', logout_on_leave)
 
 
     #Manage Buttom
     def manage_click():
-        root10.destroy()
         root.destroy()
         subprocess.run(['python','manageAccount.py'])
-        
-          
+    def manage_on_enter(e):
+        manage_buttom.config(bg='#fc0303',
+                  fg='black')
+    
+    def manage_on_leave(e):
+        manage_buttom.config(bg='#d40707',
+                  fg='black')
+    manage_buttom = Button(root10,
+                     text='Manage Account',
+                     font=('Arial', 20, 'bold'),
+                     fg='black',
+                     bg='#d40707',
+                     activeforeground='black',
+                     activebackground='#fc0303',
+                     padx=30,
+                     pady=0,
+                     command=manage_click)
+    manage_buttom.place(x=140, y=200)
+
+    manage_buttom.bind('<Enter>', manage_on_enter)
+    manage_buttom.bind('<Leave>', manage_on_leave)
 
     #Bill Buttom
+    def bill_click():
+        root10.destroy()
+        
+        # Create a new window to display the bill
+        root11 = Toplevel()
+        root11.title('Instant Order')
+        root11.geometry('1900x1080')
+        root11.configure(bg='white')
+        
+        logo = PhotoImage(file='instantorder_logowithoutbg.png')
+        root11.iconphoto(True, logo)
+        logo = PhotoImage(file='instantorder_logowithoutbg.png')
+        root11.iconphoto(True, logo)
+        
+        # Create a canvas
+        canvas = Canvas(root11, width=1920, height=1080, bg='white')
+        canvas.pack()
+        canvas.create_rectangle(200, 180, 1300, 680, outline='#d40707', width=5)
+        
+        #logo mark
+        logo_image = PhotoImage(file='instantorder_logo.png')
+        original_logo_mark = Image.open('instantorder_logo.png')
+        resized_logo_mark = original_logo_mark.resize((120, 120), Image.Resampling.LANCZOS)
+        logo_mark = ImageTk.PhotoImage(resized_logo_mark)
+        logo_mark_label = Label(root11, image=logo_mark, bg='white')
+        logo_mark_label.place(x=0, y=-25)
+        
+        # creting labels
+        order_details = Label(root11, 
+                  text='Bill', 
+                     font=('Goudy Old Style', 40, 'bold'),
+                     bg='#d40707',
+                     fg='white',
+                     padx=250)
+        order_details.place(x=450, y=100)
+        
+        
+        
+        
+
+        # Connect to the database and fetch the order details
+        conn = sqlite3.connect('orders.db')
+        c = conn.cursor()
+        c.execute("SELECT item_name, item_count, item_price, total_price FROM orders WHERE table_number=?", (table_number,))
+        orders = c.fetchall()
+        conn.close()
+
+        # Display the order details
+        y_position = 200
+        for order in orders:
+            item_name, item_count, item_price, total_price = order
+            order_label = Label(root11, text=f"{item_name} : {item_count} x Rs. {item_price} = Rs. {total_price}",
+                    font=('Arial', 18), fg='black', bg='white')
+            order_label.place(x=280, y=y_position)
+            y_position += 40
+
+        # Display the overall total price
+        overall_total_price = sum(order[3] for order in orders)
+        total_price_label = Label(root11, text=f"Total : Rs. {overall_total_price}", 
+                      font=('Arial', 25, 'bold'), fg='#d40707', bg='white')
+        total_price_label.place(x=980, y=600)
+
+        def back_click():
+            # Clear all data from the database
+            conn = sqlite3.connect('orders.db')
+            c = conn.cursor()
+            c.execute("DELETE FROM orders WHERE table_number=?", (table_number,))
+            conn.commit()
+            conn.close()
+            root11.destroy()
+            root.deiconify()
+            #placeorder_click()  # Reload the new order
+        
+        back_button = Button(root11,
+                     text='Back',
+                     font=('Arial', 26, 'bold'),
+                     bg='#d40707',
+                     fg='black',
+                     activeforeground='black',
+                     activebackground='#fc0303',
+                     padx=30,
+                     pady=0,
+                     command=back_click)
+        back_button.place(x=650, y=700)
 
     def bill_on_enter(e):
         bill_buttom.config(bg='#fc0303',
@@ -744,8 +871,8 @@ def profile_click():
                      activeforeground='black',
                      activebackground='#fc0303',
                      padx=30,
-                     pady=0,)
-                     #command=bill_click)
+                     pady=0,
+                     command=bill_click)
     bill_buttom.place(x=225, y=350)
 
     bill_buttom.bind('<Enter>', bill_on_enter)
