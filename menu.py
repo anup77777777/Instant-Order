@@ -1,7 +1,9 @@
 from tkinter import *
+from customtkinter import *
 from tkinter import messagebox
 from PIL import ImageTk, Image
 import subprocess
+import sqlite3
 
 # Global variable to store table number
 table_number = ""
@@ -78,14 +80,14 @@ def placeorder_click():
 
         #Insert Your Table Number
         insert_your_table_number = Label(root1, 
-                     text='Inser Your Table Number', 
+                     text='Insert Your Table Number', 
                      font=('Goudy Old Style', 40, 'bold'),
                      bg='#d40707',
                      fg='white',
                      padx=100)
-        insert_your_table_number.place(x=370, y=120)
+        insert_your_table_number.place(x=330, y=120)
 
-        #Table Number Entry
+            
         table_number_entry = Entry(root1,
                                  font=('Arial', 70),
                                  justify='center',
@@ -93,104 +95,129 @@ def placeorder_click():
                                  highlightthickness=2,
                                  highlightbackground='#d40707',
                                  highlightcolor='#d40707')
-        table_number_entry.place(x=470, y=330)
-
+        table_number_entry.place(x=460, y=330)
         def next_click():
-            global table_number
-            table_number = table_number_entry.get()
-            root1.destroy()
+            if len(table_number_entry.get())==0:
+                messagebox.showerror("Error","Table number cannot be empty.")
 
-            def confirm_on_enter(e):
-                confirm_button.config(fg='black',
+            elif len(table_number_entry.get())<4:
+                global table_number
+                table_number = table_number_entry.get()
+                root1.destroy()
+
+                def confirm_on_enter(e):
+                    confirm_button.config(fg='black',
                                           bg='#fc0303')
 
-            def confirm_on_leave(e):
-                confirm_button.config(fg='black',
+                def confirm_on_leave(e):
+                    confirm_button.config(fg='black',
                                            bg='#d40707')
                 
-            def back_on_enter(e):
-                back_button.config(fg='black',
+                def back_on_enter(e):
+                    back_button.config(fg='black',
                                           bg='#fc0303')
 
-            def back_on_leave(e):
-                back_button.config(fg='black',
+                def back_on_leave(e):
+                    back_button.config(fg='black',
                                            bg='#d40707')
             
-            # Calculate total prices
-            items = [
-                ("Milk Tea", milk_tea_count, 25),
-                ("Black Tea", black_tea_count, 20),
-                ("Hot Lemon", hot_lemon_count, 30),
-                ("Black Coffee", black_coffee_count, 40),
-                ("Milk Coffee", milk_coffee_count, 50),
-                ("Hot Chocolate", hot_chocolate_count, 90),
-                ("Coke", coke_count, 60),
-                ("Sprite", sprite_count, 60),
-                ("Fanta", fanta_count, 60),
-                ("Lassi", lassi_count, 60),
-                ("Veg MoMo", veg_momo_count, 100),
-                ("Buff MoMo", buff_momo_count, 130),
-                ("Chicken MoMo", chicken_momo_count, 150),
-                ("Chicken Burger", chicken_burger_count, 310),
-                ("Ham Burger", ham_burger_count, 280),
-                ("Veg Burger", veg_burger_count, 230),
-                ("Chicken Pizza", chicken_pizza_count, 550),
-                ("Mushroom Pizza", mushroom_pizza_count, 450),
-                ("Cheese Pizza", cheese_pizza_count, 500)
-            ]
+                # Calculate total prices
+                items = [
+                    ("Milk Tea", milk_tea_count, 25),
+                    ("Black Tea", black_tea_count, 20),
+                    ("Hot Lemon", hot_lemon_count, 30),
+                    ("Black Coffee", black_coffee_count, 40),
+                    ("Milk Coffee", milk_coffee_count, 50),
+                    ("Hot Chocolate", hot_chocolate_count, 90),
+                    ("Coke", coke_count, 60),
+                    ("Sprite", sprite_count, 60),
+                    ("Fanta", fanta_count, 60),
+                    ("Lassi", lassi_count, 60),
+                    ("Veg MoMo", veg_momo_count, 100),
+                    ("Buff MoMo", buff_momo_count, 130),
+                    ("Chicken MoMo", chicken_momo_count, 150),
+                    ("Chicken Burger", chicken_burger_count, 310),
+                    ("Ham Burger", ham_burger_count, 280),
+                    ("Veg Burger", veg_burger_count, 230),
+                    ("Chicken Pizza", chicken_pizza_count, 550),
+                    ("Mushroom Pizza", mushroom_pizza_count, 450),
+                    ("Cheese Pizza", cheese_pizza_count, 500)
+                ]
 
-            total_price = 0 #total price of all items
-            y_position = 230 #position of the first item
+                total_price = 0 #total price of all items
+                y_position = 230 #position of the first item
 
-            #window
-            root2= Toplevel()
-            root2.geometry('1920x1080')
-            root2.title('Confirm Order')
-            root2.configure(bg='white')
-            logo = PhotoImage(file='instantorder_logowithoutbg.png')
+                #window
+                root2= Toplevel()
+                root2.geometry('1920x1080')
+                root2.title('Confirm Order')
+                root2.configure(bg='white')
+                logo = PhotoImage(file='instantorder_logowithoutbg.png')
 
-            #Canvas
-            canvas = Canvas(root2, width=1920, height=1080, bg='white')
-            canvas.pack()
-            canvas.create_rectangle(200, 180, 1300, 680, outline='#d40707', width=5)
+                #Canvas
+                canvas = Canvas(root2, width=1920, height=1080, bg='white')
+                canvas.pack()
+                canvas.create_rectangle(200, 180, 1300, 680, outline='#d40707', width=5)
 
-            #Your Order
-            your_order= Label(root2,
+                #Your Order
+                your_order= Label(root2,
                               text='Your Order',
                               font=('Goudy Old Style', 40, 'bold'),
                               fg='white',
                               bg='#d40707',
                               padx=300)
-            your_order.place(x=320, y=100)
+                your_order.place(x=320, y=100)
 
-            # Display table number
-            table_number_label = Label(root2, text=f"Table Number : {table_number}",
+                # Display table number
+                table_number_label = Label(root2, text=f"Table Number : {table_number}",
                                        font=('Arial', 18, ), 
                                        fg='black', 
                                        bg='white')
-            table_number_label.place(x=250, y=200)
+                table_number_label.place(x=250, y=200)
 
-            # Display items and their total prices
-            for item_name, item_count, item_price in items:
-                if item_count > 0:
-                    item_total_price = item_count * item_price
-                    total_price += item_total_price
-                    item_label = Label(root2,
+                # Display items and their total prices
+                for item_name, item_count, item_price in items:
+                    if item_count > 0:
+                        item_total_price = item_count * item_price
+                        total_price += item_total_price
+                        item_label = Label(root2,
                                        text=f"{item_name} : {item_count} x Rs. {item_price}",
                                        font=('Arial', 18), 
                                        fg='black', 
                                        bg='white')
-                    item_label.place(x=250, y=y_position)
-                    y_position += 40
+                        item_label.place(x=250, y=y_position)
+                        y_position += 40
 
-            # Overall total price
-            total_price_label = Label(root2, text=f"Total : Rs. {total_price}", 
+                # Overall total price
+                total_price_label = Label(root2, text=f"Total : Rs. {total_price}", 
                                       font=('Arial', 25, 'bold')
                                       , fg='#d40707', 
                                       bg='white')
-            total_price_label.place(x=660, y=620)
+                total_price_label.place(x=660, y=620)
 
-            #Confirm
+                #Confirm
+                def confirm_click():
+                    # Save order data to database
+                    conn = sqlite3.connect('orders.db')
+                    c = conn.cursor()
+                    c.execute('''CREATE TABLE IF NOT EXISTS orders
+                             (table_number TEXT, item_name TEXT, item_count INTEGER, item_price INTEGER, total_price INTEGER)''')
+                
+                    for item_name, item_count, item_price in items:
+                        if item_count > 0:
+                            item_total_price = item_count * item_price
+                            c.execute("INSERT INTO orders (table_number, item_name, item_count, item_price, total_price) VALUES (?, ?, ?, ?, ?)",
+                                      (table_number, item_name, item_count, item_price, item_total_price))
+                
+                    conn.commit()
+                    conn.close()
+                    root.destroy()
+                    subprocess.run(['python', 'confirnorder.py'])
+                    
+            else:
+                messagebox.showerror("Error","Table number can only be 3 characters.")
+                
+
             confirm_button=Button(root2,
                                   text='Confirm',
                                   font=('Arial', 28, 'bold'),
@@ -199,7 +226,8 @@ def placeorder_click():
                                   activeforeground='black',
                                   activebackground='#fc0303',
                                   padx=30,
-                                  pady=0)
+                                  pady=0,
+                                  command=confirm_click)
             confirm_button.place(x=680, y= 700)
             confirm_button.bind('<Enter>', confirm_on_enter)
             confirm_button.bind('<Leave>', confirm_on_leave)
@@ -676,5 +704,65 @@ place_order = Button(root,
 place_order.place(x=1276, y=720)
 place_order.bind('<Enter>', placeorder_on_enter)
 place_order.bind('<Leave>', placeorder_on_leave)
+
+
+#Adding Profile Buttom abd bill button
+def profile_click():
+    root10 = Toplevel()
+    root10.title('Order Details')
+    root10.geometry('600x500')
+    root10.configure(bg='white')
+    logo = PhotoImage(file='instantorder_logowithoutbg.png')
+    root10.iconphoto(True, logo)
+
+    
+
+
+    #Manage Buttom
+    def manage_click():
+        root10.destroy()
+        root.destroy()
+        subprocess.run(['python','manageAccount.py'])
+        
+          
+
+    #Bill Buttom
+
+    def bill_on_enter(e):
+        bill_buttom.config(bg='#fc0303',
+                  fg='black')
+    
+    def bill_on_leave(e):
+        bill_buttom.config(bg='#d40707',
+                  fg='black')
+    
+    bill_buttom = Button(root10,
+                     text='Bill',
+                     font=('Arial', 20, 'bold'),
+                     fg='black',
+                     bg='#d40707',
+                     activeforeground='black',
+                     activebackground='#fc0303',
+                     padx=30,
+                     pady=0,)
+                     #command=bill_click)
+    bill_buttom.place(x=225, y=350)
+
+    bill_buttom.bind('<Enter>', bill_on_enter)
+    bill_buttom.bind('<Leave>', bill_on_leave)
+
+profile_button = CTkButton(canvas,
+                text="≡",
+                font=("Arial", 35,'bold'),
+                corner_radius=500,
+                height=50,
+                width=50,
+                text_color='black',
+                fg_color='#d40707',
+                bg_color='white',
+                hover_color='#fc0303',
+                command=profile_click)
+profile_button.place(x=1450, y=10)
+
 
 mainloop()
